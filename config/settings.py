@@ -2,7 +2,7 @@ import os
 import sys
 from dotenv import load_dotenv
 
-env_file = os.environ.get("ENV_FILE", ".env")
+env_file = os.environ.get("ENV_FILE", "envs/.env")
 load_dotenv(env_file)
 
 
@@ -25,6 +25,7 @@ class Settings:
     LIVEKIT_API_SECRET: str = _require("LIVEKIT_API_SECRET")
     DEEPGRAM_API_KEY:   str = _require("DEEPGRAM_API_KEY")
     ELEVEN_API_KEY:     str = _require("ELEVEN_API_KEY")
+    ANTHROPIC_API_KEY:  str = _require("ANTHROPIC_API_KEY")
     OLLAMA_BASE_URL:    str = _optional("OLLAMA_BASE_URL", "http://localhost:11434/v1")
 
 

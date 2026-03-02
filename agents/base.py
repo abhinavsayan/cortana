@@ -48,13 +48,20 @@ class BaseVoiceAgent(Agent):
         tools: list | None = None,
         handoff_context: HandoffContext | None = None,
     ):
-        # super().__init__() calls the parent builder `Agent(...)` in LiveKit.
-        super().__init__(instructions=self.instructions, tools=tools or [])
+        # Build STT/LLM/TTS eagerly so they're ready before the session starts.
+        # Agent.__init__ passes them to the activity, which wires them into the pipeline.
+        super().__init__(
+            instructions=self.instructions,
+            tools=tools or [],
+            stt=build_stt(self.stt_profile),
+            llm=build_llm(self.llm_profile),
+            tts=build_tts(self.voice_profile),
+        )
         self._handoff_context = handoff_context
         # State map used to share facts across agents (like a shared Session context map).
         self._state: dict = handoff_context.session_state if handoff_context else {}
         self._session_start = time.perf_counter()
-        
+
         # self.__class__.__name__ dynamically gets the name of the child class (e.g. "SellerAgent")
         # Equivalent to `this.getClass().getSimpleName()` in Java.
         self.log = logging.getLogger(self.__class__.__name__.lower())
@@ -83,13 +90,6 @@ class BaseVoiceAgent(Agent):
                 f"agent_enter handoff={ctx.status.value} from={ctx.from_agent} reason={ctx.reason!r}"
             )
 
-        # Here we finally instantiate the STT, LLM, and TTS models for the session.
-        # This resolves the commented-out segment you saw previously in worker.py!
-        self._tts = build_tts(self.voice_profile)
-        self._stt = build_stt(self.stt_profile)
-        self._llm = build_llm(self.llm_profile)
-        
-        # Trigger the initial greeting message.
         await self.greet(self._handoff_context)
 
     async def greet(self, ctx: HandoffContext | None) -> None:

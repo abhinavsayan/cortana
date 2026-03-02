@@ -8,7 +8,7 @@ from agents.base import BaseVoiceAgent, HandoffContext, HandoffStatus
 class SellerAgent(BaseVoiceAgent):
     voice_profile = VOICES["asteria"]
     stt_profile   = STT_MODELS["deepgram-en"]
-    llm_profile   = LLM_MODELS["ollama-smart"]
+    llm_profile   = LLM_MODELS["anthropic-smart"]
     instructions  = (
         "You are a friendly and knowledgeable sales assistant. "
         "Help customers understand products and services, answer questions, "

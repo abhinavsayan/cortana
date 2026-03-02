@@ -25,7 +25,7 @@ class CustomerAgent(BaseVoiceAgent):
             handoff_context=handoff_context,
         )
 
-    @function_tool
+    # @function_tool
     async def return_to_sales(self, context: RunContext, resolved: bool, summary: str):
         """Return the user to the sales agent after completing the support task."""
         from agents.seller import SellerAgent

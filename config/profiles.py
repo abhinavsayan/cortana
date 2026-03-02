@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 
-from livekit.plugins import deepgram, elevenlabs, openai
+from livekit.plugins import anthropic, deepgram, elevenlabs, openai
 
 
 # ── Dataclasses ────────────────────────────────────────────────────────────────
@@ -25,7 +25,7 @@ class STTProfile:
 
 @dataclass
 class LLMProfile:
-    provider: str       # "ollama" | "groq" | "openai"
+    provider: str       # "ollama" | "groq" | "openai" | "anthropic"
     model: str
     base_url: str | None = None
     temperature: float = 0.7
@@ -49,10 +49,12 @@ STT_MODELS: dict[str, STTProfile] = {
 _ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
 
 LLM_MODELS: dict[str, LLMProfile] = {
-    "ollama-fast":  LLMProfile(provider="ollama", model="mistral:latest",           base_url=_ollama_url),
-    "ollama-smart": LLMProfile(provider="ollama", model="mistral:latest",           base_url=_ollama_url),
-    "groq-fast":    LLMProfile(provider="groq",   model="llama-3.3-70b-versatile"),
-    "openai":       LLMProfile(provider="openai",  model="gpt-4.1-mini"),
+    "ollama-fast":       LLMProfile(provider="ollama",     model="mistral:latest",              base_url=_ollama_url),
+    "ollama-smart":      LLMProfile(provider="ollama",     model="mistral:latest",              base_url=_ollama_url),
+    "groq-fast":         LLMProfile(provider="groq",       model="llama-3.3-70b-versatile"),
+    "openai":            LLMProfile(provider="openai",     model="gpt-4.1-mini"),
+    "anthropic-fast":    LLMProfile(provider="anthropic",  model="claude-haiku-4-5-20251001"),
+    "anthropic-smart":   LLMProfile(provider="anthropic",  model="claude-sonnet-4-6"),
 }
 
 
@@ -88,4 +90,6 @@ def build_llm(profile: LLMProfile):
         return openai.LLM.with_groq(model=profile.model, temperature=profile.temperature)
     if profile.provider == "openai":
         return openai.LLM(model=profile.model, temperature=profile.temperature)
+    if profile.provider == "anthropic":
+        return anthropic.LLM(model=profile.model, temperature=profile.temperature)
     raise ValueError(f"Unknown LLM provider: {profile.provider!r}")

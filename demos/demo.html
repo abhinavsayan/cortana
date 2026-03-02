@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cortana Demo Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0f0f0f;
+      --surface: #161616;
+      --border:  #242424;
+      --text:    #e2e8f0;
+      --muted:   #52525b;
+      --green:   #4ade80;
+      --red:     #f87171;
+      --cyan:    #22d3ee;
+      --yellow:  #fbbf24;
+      --orange:  #fb923c;
+      --purple:  #a78bfa;
+      --gray:    #6b7280;
+      --blue:    #3b82f6;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      overflow: hidden;
+    }
+
+    /* ── Header ───────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0 1rem;
+      height: 40px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    header span.brand { color: var(--text); }
+    header .dot { color: var(--border); }
+
+    /* ── Layout ───────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: 210px 1fr 280px;
+      height: calc(100vh - 40px);
+    }
+
+    section {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    section:last-child { border-right: none; }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 0.75rem;
+      height: 34px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .panel-body { flex: 1; overflow-y: auto; padding: 0.6rem; }
+
+    /* ── Buttons ──────────────────────────────────────────── */
+    .btn {
+      padding: 0.3rem 0.7rem;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn:disabled { opacity: 0.35; cursor: default; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #2563eb; }
+    .btn-ghost   { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover:not(:disabled) { background: var(--border); }
+    .btn-danger  { background: #3f0e0e; color: var(--red); border: 1px solid #7f1d1d; }
+    .btn-danger:hover:not(:disabled) { background: #7f1d1d; }
+    .btn-icon    { background: none; border: none; color: var(--muted); cursor: pointer; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85rem; line-height: 1; }
+    .btn-icon:hover { color: var(--text); background: var(--border); }
+
+    /* ── New room bar ─────────────────────────────────────── */
+    .new-room-bar {
+      display: flex;
+      gap: 0.4rem;
+      padding: 0.5rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .new-room-bar input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      font-size: 0.72rem;
+      padding: 0.3rem 0.5rem;
+      outline: none;
+    }
+    .new-room-bar input:focus { border-color: var(--blue); }
+
+    /* ── Rooms panel ──────────────────────────────────────── */
+    .room-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.55rem 0.65rem;
+      margin-bottom: 0.4rem;
+    }
+    .room-card-name {
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-bottom: 0.2rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .room-card-meta { font-size: 0.68rem; color: var(--muted); margin-bottom: 0.45rem; }
+    .empty-state { color: var(--muted); font-size: 0.78rem; text-align: center; padding: 2rem 0; }
+
+    /* ── Connection panel ─────────────────────────────────── */
+    #connection-panel { border-right: 1px solid var(--border); }
+    #conn-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1.5rem;
+    }
+
+    .status-orb {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      transition: border-color 0.4s, box-shadow 0.4s;
+    }
+    .status-orb.connected  { border-color: var(--green); box-shadow: 0 0 18px #4ade8040; }
+    .status-orb.connecting { border-color: var(--yellow); animation: pulse 1.4s infinite; }
+    .status-orb.error      { border-color: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .status-text { font-size: 0.8rem; color: var(--muted); text-align: center; max-width: 200px; }
+    .room-name-label { font-size: 1rem; font-weight: 700; text-align: center; }
+
+    .agent-pill {
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.3s;
+    }
+    .pill-idle      { background: #1c1c1c; color: var(--muted); }
+    .pill-listening { background: #052e16; color: var(--green); }
+    .pill-thinking  { background: #3b1f04; color: var(--yellow); }
+    .pill-speaking  { background: #431407; color: var(--orange); }
+
+    .controls { display: flex; gap: 0.5rem; }
+
+    /* ── Pipeline feed ────────────────────────────────────── */
+    #pipeline-feed { display: flex; flex-direction: column; gap: 2px; }
+
+    .pipe-entry {
+      display: grid;
+      grid-template-columns: 44px 40px 1fr;
+      gap: 0.4rem;
+      padding: 0.3rem 0.4rem;
+      border-radius: 5px;
+      align-items: baseline;
+      line-height: 1.5;
+    }
+    .pipe-entry:hover { background: #1a1a1a; }
+
+    .pipe-time { font-size: 0.6rem; color: var(--muted); white-space: nowrap; }
+    .pipe-tag {
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.12rem 0.3rem;
+      border-radius: 3px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .pipe-text { font-size: 0.73rem; color: var(--text); word-break: break-word; }
+
+    .tag-stt   { background: #0c2a3a; color: var(--cyan);   }
+    .tag-agent { background: #052e16; color: var(--green);  }
+    .tag-llm   { background: #3b1f04; color: var(--yellow); }
+    .tag-tts   { background: #431407; color: var(--orange); }
+    .tag-room  { background: #2e1065; color: var(--purple); }
+    .tag-data  { background: #1c1c1c; color: var(--gray);   }
+
+    /* scrollbar styling */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="brand">Cortana</span>
+    <span class="dot">|</span>
+    <span>Demo Dashboard</span>
+  </header>
+
+  <div class="grid">
+
+    <!-- ── LEFT: Rooms ───────────────────────────────────── -->
+    <section id="rooms-panel">
+      <div class="panel-header">
+        <span>Live Rooms</span>
+        <button class="btn-icon" id="refresh-btn" title="Refresh rooms">↻</button>
+      </div>
+      <div class="new-room-bar">
+        <input id="new-room-input" type="text" value="demo-room" placeholder="room name" />
+        <button class="btn btn-primary" onclick="createAndJoin()">+ Join</button>
+      </div>
+      <div class="panel-body" id="rooms-list">
+        <div class="empty-state">Loading…</div>
+      </div>
+    </section>
+
+    <!-- ── CENTER: Connection ────────────────────────────── -->
+    <section id="connection-panel">
+      <div class="panel-header"><span>Connection</span></div>
+      <div id="conn-body">
+        <div class="status-orb" id="status-orb">🎙</div>
+        <div class="status-text" id="status-text">Idle — select a room to join</div>
+        <div class="room-name-label" id="room-name-label" style="display:none"></div>
+        <div class="agent-pill pill-idle" id="agent-pill" style="display:none">Agent: idle</div>
+        <div class="controls">
+          <button class="btn btn-ghost"   id="mute-btn"  disabled>Mute</button>
+          <button class="btn btn-danger"  id="leave-btn" disabled>Leave</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── RIGHT: Pipeline ───────────────────────────────── -->
+    <section id="pipeline-panel">
+      <div class="panel-header">
+        <span>Pipeline</span>
+        <button class="btn-icon" id="clear-btn" title="Clear feed">✕</button>
+      </div>
+      <div class="panel-body">
+        <div id="pipeline-feed"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Server injects {{LIVEKIT_URL}} at serve time; fallback for direct file open
+    const _raw = '{{LIVEKIT_URL}}';
+    const LIVEKIT_URL = (_raw === '{{LIVEKIT_URL}}') ? 'ws://localhost:7880' : _raw;
+
+    const { Room, RoomEvent, Track, ParticipantKind } = LivekitClient;
+
+    // ── DOM refs ────────────────────────────────────────────────────────────
+    const roomsList    = document.getElementById('rooms-list');
+    const statusOrb    = document.getElementById('status-orb');
+    const statusText   = document.getElementById('status-text');
+    const roomNameLbl  = document.getElementById('room-name-label');
+    const agentPill    = document.getElementById('agent-pill');
+    const muteBtn      = document.getElementById('mute-btn');
+    const leaveBtn     = document.getElementById('leave-btn');
+    const pipelineFeed = document.getElementById('pipeline-feed');
+    const refreshBtn   = document.getElementById('refresh-btn');
+    const clearBtn     = document.getElementById('clear-btn');
+
+    // ── State ───────────────────────────────────────────────────────────────
+    let room          = null;
+    let muted         = false;
+    let refreshTimer  = null;
+
+    // ── Pipeline feed ────────────────────────────────────────────────────────
+    function addEntry(tag, text, cls) {
+      const now = new Date();
+      const t   = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const row = document.createElement('div');
+      row.className = 'pipe-entry';
+      row.innerHTML =
+        `<span class="pipe-time">${t}</span>` +
+        `<span class="pipe-tag tag-${cls}">${esc(tag)}</span>` +
+        `<span class="pipe-text">${esc(text)}</span>`;
+      pipelineFeed.prepend(row);
+    }
+
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    clearBtn.addEventListener('click', () => { pipelineFeed.innerHTML = ''; });
+
+    // ── Rooms list ───────────────────────────────────────────────────────────
+    async function loadRooms() {
+      refreshBtn.style.opacity = '0.3';
+      try {
+        const res = await fetch('/api/rooms');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { rooms, error } = await res.json();
+        if (error) throw new Error(error);
+        renderRooms(rooms || []);
+      } catch (e) {
+        roomsList.innerHTML = `<div class="empty-state" style="color:var(--red)">⚠ ${esc(e.message)}</div>`;
+      } finally {
+        refreshBtn.style.opacity = '1';
+      }
+    }
+
+    function renderRooms(rooms) {
+      const currentRoom = room?.name ?? null;
+      if (rooms.length === 0) {
+        roomsList.innerHTML = '<div class="empty-state">No active rooms</div>';
+        return;
+      }
+      roomsList.innerHTML = rooms.map(r => {
+        const joined = r.name === currentRoom;
+        const count  = r.numParticipants ?? 0;
+        return `
+          <div class="room-card">
+            <div class="room-card-name" title="${esc(r.name)}">${esc(r.name)}</div>
+            <div class="room-card-meta">${count} participant${count !== 1 ? 's' : ''}</div>
+            <button class="btn btn-primary"
+              onclick="joinRoom('${esc(r.name)}')"
+              ${joined ? 'disabled' : ''}>
+              ${joined ? 'Joined ✓' : 'Join'}
+            </button>
+          </div>`;
+      }).join('');
+    }
+
+    refreshBtn.addEventListener('click', loadRooms);
+
+    function startAutoRefresh() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(loadRooms, 5000);
+    }
+
+    // ── Connection state helpers ─────────────────────────────────────────────
+    function setStatus(state, text) {
+      statusOrb.className  = `status-orb ${state}`;
+      statusText.textContent = text;
+    }
+
+    function setAgentState(state) {
+      const pillClass = {
+        idle:      'pill-idle',
+        listening: 'pill-listening',
+        thinking:  'pill-thinking',
+        speaking:  'pill-speaking',
+      }[state] ?? 'pill-idle';
+      agentPill.className   = `agent-pill ${pillClass}`;
+      agentPill.textContent = `Agent: ${state}`;
+      agentPill.style.display = '';
+    }
+
+    // ── Join / leave ─────────────────────────────────────────────────────────
+    async function joinRoom(roomName) {
+      if (room) await leaveRoom();
+
+      setStatus('connecting', `Connecting to ${roomName}…`);
+      statusOrb.textContent = '…';
+      addEntry('ROOM', `Connecting → ${roomName}`, 'room');
+
+      const identity = `demo-${Math.random().toString(36).slice(2, 7)}`;
+      let token;
+      try {
+        const res = await fetch(`/api/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        token = data.token;
+      } catch (e) {
+        setStatus('error', 'Token error');
+        statusOrb.textContent = '✕';
+        addEntry('ROOM', `Token error: ${e.message}`, 'room');
+        return;
+      }
+
+      room = new Room({ adaptiveStream: true, dynacast: true });
+      wireEvents(room);
+
+      try {
+        await room.connect(LIVEKIT_URL, token);
+        await room.localParticipant.setMicrophoneEnabled(true);
+        muted = false;
+        muteBtn.textContent = 'Mute';
+        muteBtn.disabled  = false;
+        leaveBtn.disabled = false;
+        roomNameLbl.textContent = roomName;
+        roomNameLbl.style.display = '';
+        setAgentState('idle');
+        addEntry('ROOM', `Microphone enabled`, 'room');
+      } catch (e) {
+        setStatus('error', `Connect failed: ${e.message}`);
+        statusOrb.textContent = '✕';
+        addEntry('ROOM', `Connect failed: ${e.message}`, 'room');
+        room = null;
+        muteBtn.disabled  = true;
+        leaveBtn.disabled = true;
+      }
+    }
+
+    async function leaveRoom() {
+      if (!room) return;
+      addEntry('ROOM', `Left ${room.name}`, 'room');
+      await room.disconnect();
+      room             = null;
+      muted            = false;
+      muteBtn.disabled  = true;
+      leaveBtn.disabled = true;
+      muteBtn.textContent = 'Mute';
+      roomNameLbl.style.display = 'none';
+      agentPill.style.display   = 'none';
+      setStatus('', 'Idle — select a room to join');
+      statusOrb.className   = 'status-orb';
+      statusOrb.textContent = '🎙';
+      loadRooms();
+    }
+
+    muteBtn.addEventListener('click', async () => {
+      if (!room) return;
+      muted = !muted;
+      await room.localParticipant.setMicrophoneEnabled(!muted);
+      muteBtn.textContent = muted ? 'Unmute' : 'Mute';
+      addEntry('ROOM', muted ? 'Microphone muted' : 'Microphone unmuted', 'room');
+    });
+
+    leaveBtn.addEventListener('click', leaveRoom);
+
+    // ── Room event wiring ────────────────────────────────────────────────────
+    function wireEvents(r) {
+
+      r.on(RoomEvent.Connected, () => {
+        setStatus('connected', 'Connected');
+        statusOrb.textContent = '✓';
+        addEntry('ROOM', `Connected to "${r.name}"`, 'room');
+        loadRooms(); // refresh to show joined state
+      });
+
+      r.on(RoomEvent.Disconnected, () => {
+        setStatus('', 'Disconnected');
+        statusOrb.textContent = '🎙';
+        agentPill.style.display = 'none';
+        addEntry('ROOM', 'Disconnected', 'room');
+        loadRooms();
+      });
+
+      r.on(RoomEvent.ParticipantConnected, (p) => {
+        const isAgent = p.kind === ParticipantKind?.AGENT;
+        addEntry('ROOM', `${p.identity}${isAgent ? ' (agent)' : ''} joined`, 'room');
+        if (isAgent) setAgentState('idle');
+      });
+
+      r.on(RoomEvent.ParticipantDisconnected, (p) => {
+        addEntry('ROOM', `${p.identity} left`, 'room');
+      });
+
+      r.on(RoomEvent.TrackSubscribed, (track, _pub, participant) => {
+        if (track.kind === Track.Kind.Audio) {
+          const el = track.attach();
+          document.body.appendChild(el);
+          addEntry('TTS', `Audio from ${participant.identity}`, 'tts');
+        }
+      });
+
+      r.on(RoomEvent.TrackUnsubscribed, (track) => {
+        if (track.kind === Track.Kind.Audio) track.detach();
+      });
+
+      // Agent state & arbitrary attribute changes
+      r.on(RoomEvent.ParticipantAttributesChanged, (changed, participant) => {
+        for (const [key, val] of Object.entries(changed)) {
+          if (key === 'lk.agent.state' || key === 'ag.state') {
+            setAgentState(val);
+            if      (val === 'thinking')  addEntry('LLM',   'Thinking…', 'llm');
+            else if (val === 'speaking')  addEntry('TTS',   'Speaking',  'tts');
+            else if (val === 'listening') addEntry('STT',   'Listening', 'stt');
+          } else {
+            addEntry('DATA', `${participant.identity} · ${key} = ${val}`, 'data');
+          }
+        }
+      });
+
+      // STT / agent transcriptions (livekit-client v2+)
+      if (RoomEvent.TranscriptionReceived) {
+        r.on(RoomEvent.TranscriptionReceived, (segments, participant) => {
+          for (const seg of segments) {
+            if (!seg.final || !seg.text.trim()) continue;
+            const isAgent = participant?.kind === ParticipantKind?.AGENT;
+            if (isAgent) {
+              addEntry('AGENT', seg.text, 'agent');
+            } else {
+              addEntry('STT', seg.text, 'stt');
+            }
+          }
+        });
+      }
+
+      // Raw data messages
+      r.on(RoomEvent.DataReceived, (payload, participant, _kind, topic) => {
+        try {
+          const txt = new TextDecoder().decode(payload);
+          let display;
+          try { display = JSON.stringify(JSON.parse(txt)); }
+          catch { display = txt; }
+          const who = participant?.identity ?? '?';
+          const top = topic ? ` [${topic}]` : '';
+          addEntry('DATA', `${who}${top}: ${display}`, 'data');
+        } catch {
+          addEntry('DATA', `[binary ${payload.byteLength}b]`, 'data');
+        }
+      });
+    }
+
+    // ── Create & join new room ───────────────────────────────────────────────
+    function createAndJoin() {
+      const name = document.getElementById('new-room-input').value.trim();
+      if (!name) return;
+      joinRoom(name); // LiveKit auto-creates the room on first participant join
+    }
+
+    document.getElementById('new-room-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') createAndJoin();
+    });
+
+    // ── Init ─────────────────────────────────────────────────────────────────
+    loadRooms();
+    startAutoRefresh();
+  </script>
+</body>
+</html>

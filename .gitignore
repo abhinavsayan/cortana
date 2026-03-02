@@ -20,9 +20,11 @@ env/
 .env
 .env.*
 *.env
+envs/.env.*
 # But allow example files
 !.env.*.example
 !*.env.example
+!envs/.env.*.example
 
 # IDE
 .vscode/

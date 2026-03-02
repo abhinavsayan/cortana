@@ -2,6 +2,7 @@ python-dotenv
 livekit-agents~=1.4
 livekit-plugins-silero
 livekit-plugins-openai
+livekit-plugins-anthropic
 livekit-plugins-deepgram
 livekit-plugins-elevenlabs
 livekit-plugins-turn-detector

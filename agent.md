@@ -4,8 +4,8 @@
 
 Build a low-latency, modular voice agent platform using **LiveKit Agents** as the orchestration framework. Multiple deployable voice agents (e.g. SellerAgent, CustomerAgent) each own their voice identity and LLM config. Voice agents delegate tasks to specialised sub-agents (email, CRM, chat) via a TaskDispatcher that supports both fire-and-forget and blocking request/response patterns.
 
-See [design.md](design.md) for architecture and implementation details.
-See [progress.md](progress.md) for current status and deferred areas.
+See [design.md](docs/design.md) for architecture and implementation details.
+See [progress.md](docs/progress.md) for current status and deferred areas.
 
 ---
 
@@ -53,9 +53,25 @@ cortana/
 │   ├── crm.py               # CRMSubAgent   — REQUEST_RESPONSE, timeout=8s
 │   └── chat.py              # ChatSubAgent  — TBD
 │
+├── demos/
+│   ├── demo.html            # Browser demo UI
+│   └── demo_server.py       # Local demo server
+│
+├── scripts/
+│   └── get_token_for_play.py  # Generate LiveKit token for playground testing
+│
+├── docs/
+│   ├── design.md            # Architecture and implementation details
+│   ├── progress.md          # Current status and deferred areas
+│   └── *.excalidraw         # Architecture diagrams
+│
+├── envs/
+│   ├── .env.seller          # AGENT_NAME=seller + API keys (gitignored)
+│   ├── .env.customer        # AGENT_NAME=customer + API keys (gitignored)
+│   ├── .env.seller.example  # committed template
+│   └── .env.customer.example
+│
 ├── worker.py                # entrypoint(), AGENT_REGISTRY, AgentSession bootstrap
-├── .env.seller              # AGENT_NAME=seller + API keys for seller deployment
-├── .env.customer            # AGENT_NAME=customer + API keys for customer deployment
 └── requirements.txt
 ```
 
@@ -93,16 +109,33 @@ livekit-server --dev
 # 3. Install dependencies
 python3.12 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-
-# 4. Start a deployment
-ENV_FILE=.env.seller python worker.py dev
-# or
-ENV_FILE=.env.customer python worker.py dev
 ```
 
-### Test Options
-- **Playground**: https://agents-playground.livekit.io
-- **Console mode**: `ENV_FILE=.env.seller python worker.py console`
+### Demo Dashboard (recommended for local dev)
+
+The demo dashboard is the easiest way to test an agent end-to-end. It runs a local web server that handles room creation and joining.
+
+**Terminal 1 — Demo server:**
+```bash
+source venv/bin/activate
+python demos/demo_server.py                             # reads envs/.env.customer by default
+ENV_FILE=envs/.env.seller python demos/demo_server.py   # for seller agent
+```
+Open http://localhost:8080, type a room name, and click **+ Join**.
+
+**Terminal 2 — Agent worker:**
+```bash
+source venv/bin/activate
+ENV_FILE=envs/.env.customer python worker.py connect --room <room-name>
+# e.g. python worker.py connect --room demo-room
+```
+
+> **Why `connect` mode?** With a self-hosted LiveKit server, `dev` mode job dispatch can silently fail — the job is accepted but the worker never connects to the room. `connect` mode attaches directly to a named room, bypassing dispatch. It's reliable for local development.
+
+### Other Run Modes
+- **Console mode** (text-only, no audio): `ENV_FILE=envs/.env.seller python worker.py console`
+- **Playground**: https://agents-playground.livekit.io — use with `worker.py dev` against LiveKit Cloud
+- **Dev mode** (LiveKit Cloud only): `ENV_FILE=envs/.env.seller python worker.py dev`
 
 ---
 
@@ -147,9 +180,11 @@ stt_profile = STT_MODELS["deepgram-es"]
 | Issue | Fix |
 |-------|-----|
 | Ollama connection refused | Run `ollama serve`. Check `curl http://localhost:11434/api/tags` |
+| Agent never joins room (`dev` mode) | Use `connect` mode: `python worker.py connect --room <room-name>`. Job dispatch is unreliable with self-hosted LiveKit. |
 | Slow LLM responses | Switch to `groq-fast` preset |
 | ElevenLabs quota exceeded | Switch to Deepgram TTS for testing |
 | Agent not responding | Check `DEEPGRAM_API_KEY` and `ELEVEN_API_KEY` in `.env` |
 | Sub-agent timeout | Increase `timeout` on the `BaseSubAgent` subclass |
 | Echo / feedback loop | Use headphones during testing |
 | Tools not working with Ollama | Use `mistral` or `llama3.1` — they support function calling |
+| Port 8080 already in use | `lsof -ti :8080 \| xargs kill -9` |
