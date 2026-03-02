@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cortana Voice Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    h1 { font-size: 1.4rem; margin-bottom: 1rem; letter-spacing: 0.05em; }
+    #status { font-size: 0.9rem; color: #aaa; margin-bottom: 1.5rem; }
+    #status.connected { color: #4ade80; }
+    #status.error { color: #f87171; }
+    button { padding: 0.7rem 2rem; font-size: 1rem; border: none; border-radius: 8px; cursor: pointer; background: #3b82f6; color: white; }
+    button:disabled { background: #555; cursor: default; }
+    #log { margin-top: 1.5rem; width: 500px; max-height: 200px; overflow-y: auto; font-size: 0.75rem; color: #888; background: #1a1a1a; border-radius: 8px; padding: 0.8rem; }
+    #log p { margin: 0.2rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Cortana Voice Demo</h1>
+  <div id="status">Connecting...</div>
+  <button id="btn" disabled>Mute</button>
+  <div id="log"></div>
+
+  <script>
+    const LIVEKIT_URL = 'ws://localhost:7880';
+    const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiRGVtbyBVc2VyIiwidmlkZW8iOnsicm9vbUpvaW4iOnRydWUsInJvb20iOiJkZW1vLXJvb20iLCJjYW5QdWJsaXNoIjp0cnVlLCJjYW5TdWJzY3JpYmUiOnRydWUsImNhblB1Ymxpc2hEYXRhIjp0cnVlfSwic3ViIjoidXNlci0xIiwiaXNzIjoiZGV2a2V5IiwibmJmIjoxNzcyNDE1NDM0LCJleHAiOjE3NzI0MzcwMzR9.c-K1qlpxU23A_AHf-JP45yhUJkQ5ndm0v2E3yM85pwQ';
+
+    const { Room, RoomEvent, Track, createLocalTracks } = LivekitClient;
+
+    const statusEl = document.getElementById('status');
+    const btn = document.getElementById('btn');
+    const logEl = document.getElementById('log');
+
+    function log(msg) {
+      const p = document.createElement('p');
+      p.textContent = `${new Date().toLocaleTimeString()} — ${msg}`;
+      logEl.prepend(p);
+    }
+
+    const room = new Room({ adaptiveStream: true, dynacast: true });
+
+    room.on(RoomEvent.Connected, () => {
+      statusEl.textContent = 'Connected to demo-room';
+      statusEl.className = 'connected';
+      btn.disabled = false;
+      log('Room connected');
+    });
+
+    room.on(RoomEvent.Disconnected, () => {
+      statusEl.textContent = 'Disconnected';
+      statusEl.className = '';
+      btn.disabled = true;
+      log('Disconnected');
+    });
+
+    room.on(RoomEvent.TrackSubscribed, (track, pub, participant) => {
+      log(`Agent track: ${track.kind} from ${participant.identity}`);
+      if (track.kind === Track.Kind.Audio) {
+        const el = track.attach();
+        document.body.appendChild(el);
+        log('Agent audio attached — you should hear the agent');
+      }
+    });
+
+    room.on(RoomEvent.ParticipantConnected, (p) => log(`Participant joined: ${p.identity}`));
+    room.on(RoomEvent.ParticipantDisconnected, (p) => log(`Participant left: ${p.identity}`));
+
+    let muted = false;
+    btn.addEventListener('click', async () => {
+      muted = !muted;
+      await room.localParticipant.setMicrophoneEnabled(!muted);
+      btn.textContent = muted ? 'Unmute' : 'Mute';
+    });
+
+    async function connect() {
+      try {
+        await room.connect(LIVEKIT_URL, TOKEN);
+        await room.localParticipant.setMicrophoneEnabled(true);
+        log('Microphone enabled');
+      } catch (e) {
+        statusEl.textContent = 'Connection failed: ' + e.message;
+        statusEl.className = 'error';
+        log('Error: ' + e.message);
+      }
+    }
+
+    connect();
+  </script>
+</body>
+</html>

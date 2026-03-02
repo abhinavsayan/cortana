@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Voice AI Agent Architecture</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; background: #f8f9fa; }
+    h2 { text-align: center; padding: 12px; background: #1e1e2e; color: #cdd6f4; margin: 0; }
+    #instructions {
+      background: #e7f5ff;
+      border: 1px solid #74c0fc;
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin: 16px auto;
+      max-width: 780px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    #instructions strong { color: #1971c2; }
+    #canvas-container {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    canvas { border: 2px solid #dee2e6; border-radius: 8px; background: white; }
+    .open-btn {
+      display: block;
+      margin: 0 auto 20px;
+      padding: 12px 28px;
+      background: #1971c2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      width: fit-content;
+    }
+    .open-btn:hover { background: #1864ab; }
+  </style>
+</head>
+<body>
+<h2>Real-Time Voice AI Agent — Architecture Diagram</h2>
+<div id="instructions">
+  <strong>To view in Excalidraw:</strong><br/>
+  1. Click the button below to open Excalidraw<br/>
+  2. Once it loads, drag and drop the file <code>voice-agent-architecture.excalidraw</code> from this directory into the Excalidraw canvas<br/>
+  &mdash; or &mdash; use <strong>File &rarr; Open</strong> inside Excalidraw to open the <code>.excalidraw</code> file directly.
+  <br/><br/>
+  File path: <code>/Users/batman/dev/cortana/voice-agent-architecture.excalidraw</code>
+</div>
+<a class="open-btn" href="https://excalidraw.com" target="_blank">Open Excalidraw in Browser</a>
+<div id="canvas-container">
+  <canvas id="diagram" width="1050" height="620"></canvas>
+</div>
+
+<script>
+const canvas = document.getElementById('diagram');
+const ctx = canvas.getContext('2d');
+
+// --- Helpers ---
+function roundRect(x, y, w, h, r, fill, stroke) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
+}
+
+function text(str, x, y, size, color, align) {
+  ctx.font = `${size || 14}px 'Segoe UI', sans-serif`;
+  ctx.fillStyle = color || '#1e1e1e';
+  ctx.textAlign = align || 'center';
+  ctx.textBaseline = 'middle';
+  const lines = str.split('\n');
+  const lineH = (size || 14) * 1.4;
+  const top = y - ((lines.length - 1) * lineH) / 2;
+  lines.forEach((l, i) => ctx.fillText(l, x, top + i * lineH));
+}
+
+function arrow(x1, y1, x2, y2, color) {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const len = 10;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.strokeStyle = color || '#1e1e1e';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // arrowhead
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - len * Math.cos(angle - Math.PI / 6), y2 - len * Math.sin(angle - Math.PI / 6));
+  ctx.lineTo(x2 - len * Math.cos(angle + Math.PI / 6), y2 - len * Math.sin(angle + Math.PI / 6));
+  ctx.closePath();
+  ctx.fillStyle = color || '#1e1e1e';
+  ctx.fill();
+}
+
+function arrowPath(points, color) {
+  if (points.length < 2) return;
+  ctx.beginPath();
+  ctx.moveTo(points[0][0], points[0][1]);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i][0], points[i][1]);
+  ctx.strokeStyle = color || '#1e1e1e';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // arrowhead at last segment
+  const [px, py] = points[points.length - 2];
+  const [qx, qy] = points[points.length - 1];
+  const angle = Math.atan2(qy - py, qx - px);
+  const len = 10;
+  ctx.beginPath();
+  ctx.moveTo(qx, qy);
+  ctx.lineTo(qx - len * Math.cos(angle - Math.PI / 6), qy - len * Math.sin(angle - Math.PI / 6));
+  ctx.lineTo(qx - len * Math.cos(angle + Math.PI / 6), qy - len * Math.sin(angle + Math.PI / 6));
+  ctx.closePath();
+  ctx.fillStyle = color || '#1e1e1e';
+  ctx.fill();
+}
+
+// ---- Draw ----
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+// Title
+text('Real-Time Voice AI Agent — Architecture', 525, 30, 20, '#1e1e1e');
+
+// === USER BOX ===
+roundRect(30, 230, 140, 110, 10, '#dbe4ff', '#364fc7');
+text('User\nBrowser / Phone', 100, 285, 15);
+
+// === LIVEKIT SERVER (SFU) ===
+roundRect(230, 210, 180, 150, 10, '#d3f9d8', '#2f9e44');
+text('LiveKit Server\n(SFU)\n☁ Cloud', 320, 285, 15, '#1a7735');
+
+// === AGENT WORKER OUTER BOX ===
+roundRect(470, 100, 550, 470, 14, '#fff9db', '#f08c00');
+ctx.font = 'bold 18px sans-serif';
+ctx.fillStyle = '#7c5700';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText('LiveKit Agent Worker', 745, 125);
+
+// --- VAD ---
+roundRect(490, 155, 185, 75, 8, '#ffe8cc', '#e67700');
+text('Silero VAD\n(Voice Activity Detection)', 582, 193, 13, '#7c3e00');
+
+// --- STT ---
+roundRect(490, 265, 185, 75, 8, '#ffd8a8', '#e67700');
+text('Deepgram STT\n(Speech-to-Text)', 582, 303, 13, '#7c3e00');
+
+// --- LLM ---
+roundRect(700, 265, 200, 75, 8, '#b2f2bb', '#2f9e44');
+text('Ollama LLM\n(local)', 800, 303, 13, '#1a4e27');
+
+// --- TTS ---
+roundRect(700, 385, 200, 75, 8, '#d0bfff', '#7048e8');
+text('ElevenLabs TTS\n(Text-to-Speech)', 800, 423, 13, '#3b1f8a');
+
+// === ARROWS — EXTERNAL ===
+// User -> LiveKit (WebRTC/SIP)
+arrow(172, 263, 228, 263, '#1971c2');
+text('WebRTC / SIP', 200, 249, 12, '#1971c2');
+
+// LiveKit -> User (audio)
+arrow(230, 295, 172, 295, '#2f9e44');
+text('audio', 200, 308, 12, '#2f9e44');
+
+// LiveKit -> VAD (audio frames)
+arrowPath([[412, 250], [490, 210]], '#1971c2');
+text('audio frames', 452, 228, 12, '#1971c2');
+
+// TTS -> LiveKit (audio back)
+arrowPath([[700, 420], [580, 420], [580, 540], [380, 540], [380, 340], [412, 340]], '#2f9e44');
+text('audio', 490, 555, 12, '#2f9e44');
+
+// === ARROWS — INTERNAL PIPELINE ===
+// VAD -> STT
+arrow(582, 232, 582, 263, '#e67700');
+text('audio frames', 620, 248, 11, '#e67700', 'left');
+
+// STT -> LLM
+arrow(677, 303, 698, 303, '#e67700');
+text('text', 688, 291, 12, '#e67700');
+
+// LLM -> TTS
+arrow(800, 342, 800, 383, '#e67700');
+text('streaming tokens', 808, 362, 11, '#e67700', 'left');
+
+// === LEGEND ===
+roundRect(30, 490, 200, 100, 6, '#f8f9fa', '#adb5bd');
+ctx.font = 'bold 12px sans-serif';
+ctx.fillStyle = '#555';
+ctx.textAlign = 'left';
+ctx.textBaseline = 'middle';
+ctx.fillText('Legend', 45, 505);
+
+function legendLine(x, y, color, label) {
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 30, y);
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+  ctx.font = '11px sans-serif'; ctx.fillStyle = '#333';
+  ctx.fillText(label, x + 38, y);
+}
+legendLine(45, 525, '#1971c2', 'Audio input flow');
+legendLine(45, 545, '#2f9e44', 'Audio output flow');
+legendLine(45, 565, '#e67700', 'Internal pipeline');
+
+</script>
+</body>
+</html>
