@@ -314,6 +314,7 @@
         `<span class="pipe-tag tag-${cls}">${esc(tag)}</span>` +
         `<span class="pipe-text">${esc(text)}</span>`;
       pipelineFeed.prepend(row);
+      return row;
     }
 
     function esc(s) {
@@ -517,15 +518,31 @@
       });
 
       // STT / agent transcriptions (livekit-client v2+)
+      const streamingRows = { agent: null, stt: null };
       if (RoomEvent.TranscriptionReceived) {
         r.on(RoomEvent.TranscriptionReceived, (segments, participant) => {
           for (const seg of segments) {
-            if (!seg.final || !seg.text.trim()) continue;
+            if (!seg.text.trim()) continue;
             const isAgent = participant?.kind === ParticipantKind?.AGENT;
-            if (isAgent) {
-              addEntry('AGENT', seg.text, 'agent');
+            const key = isAgent ? 'agent' : 'stt';
+            const tag = isAgent ? 'AGENT' : 'STT';
+            const cls = key;
+
+            if (!seg.final) {
+              // interim: create or update the in-progress row
+              if (!streamingRows[key]) {
+                streamingRows[key] = addEntry(tag, seg.text, cls);
+              } else {
+                streamingRows[key].querySelector('.pipe-text').textContent = seg.text;
+              }
             } else {
-              addEntry('STT', seg.text, 'stt');
+              // final: commit or replace
+              if (streamingRows[key]) {
+                streamingRows[key].querySelector('.pipe-text').textContent = seg.text;
+                streamingRows[key] = null;
+              } else {
+                addEntry(tag, seg.text, cls);
+              }
             }
           }
         });
