@@ -2,7 +2,7 @@ import os
 import sys
 from dotenv import load_dotenv
 
-env_file = os.environ.get("ENV_FILE", "envs/.env")
+env_file = os.environ.get("ENV_FILE", "envs/.env.customer")
 load_dotenv(env_file)
 
 

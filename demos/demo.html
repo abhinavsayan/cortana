@@ -8,53 +8,124 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:      #0f0f0f;
-      --surface: #161616;
-      --border:  #242424;
-      --text:    #e2e8f0;
-      --muted:   #52525b;
-      --green:   #4ade80;
-      --red:     #f87171;
-      --cyan:    #22d3ee;
-      --yellow:  #fbbf24;
-      --orange:  #fb923c;
-      --purple:  #a78bfa;
-      --gray:    #6b7280;
-      --blue:    #3b82f6;
+      --bg:       #090b10;
+      --surface:  #0e1117;
+      --surface2: #13161e;
+      --border:   #1e2330;
+      --border2:  #2a3147;
+      --text:     #c9d1e0;
+      --muted:    #4a5568;
+
+      --green:    #34d399;
+      --red:      #f87171;
+      --cyan:     #22d3ee;
+      --yellow:   #fbbf24;
+      --orange:   #fb923c;
+      --purple:   #a78bfa;
+      --gray:     #6b7280;
+      --blue:     #4f8ef7;
+
+      --glow-green:  #34d39938;
+      --glow-cyan:   #22d3ee30;
+      --glow-yellow: #fbbf2430;
+      --glow-orange: #fb923c30;
+      --glow-purple: #a78bfa30;
+      --glow-blue:   #4f8ef720;
+      --glow-red:    #f8717130;
+
+      --font-ui:   'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
     }
 
     html, body {
       height: 100%;
       background: var(--bg);
       color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: var(--font-ui);
       font-size: 13px;
       overflow: hidden;
     }
 
-    /* ── Header ───────────────────────────────────────────── */
+    /* ── Header ─────────────────────────────────────────────── */
     header {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0 1rem;
-      height: 40px;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+      height: 48px;
+      background: linear-gradient(180deg, #0d1018 0%, var(--bg) 100%);
       border-bottom: 1px solid var(--border);
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
       flex-shrink: 0;
     }
-    header span.brand { color: var(--text); }
-    header .dot { color: var(--border); }
 
-    /* ── Layout ───────────────────────────────────────────── */
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-icon { flex-shrink: 0; }
+
+    span.brand {
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    .header-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .header-product {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .header-clock {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .live-badge {
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--green);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .live-badge.active {
+      opacity: 1;
+      animation: livePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.35; }
+    }
+
+    /* ── Layout ──────────────────────────────────────────────── */
     .grid {
       display: grid;
-      grid-template-columns: 210px 1fr 280px;
-      height: calc(100vh - 40px);
+      grid-template-columns: 220px 1fr 300px;
+      height: calc(100vh - 48px);
     }
 
     section {
@@ -62,6 +133,7 @@
       flex-direction: column;
       overflow: hidden;
       border-right: 1px solid var(--border);
+      background: var(--bg);
     }
     section:last-child { border-right: none; }
 
@@ -72,7 +144,8 @@
       padding: 0 0.75rem;
       height: 34px;
       border-bottom: 1px solid var(--border);
-      font-size: 0.65rem;
+      background: var(--surface);
+      font-size: 0.6rem;
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -82,161 +155,624 @@
 
     .panel-body { flex: 1; overflow-y: auto; padding: 0.6rem; }
 
-    /* ── Buttons ──────────────────────────────────────────── */
+    /* ── Buttons ─────────────────────────────────────────────── */
     .btn {
-      padding: 0.3rem 0.7rem;
+      padding: 0.4rem 1rem;
       border: none;
-      border-radius: 5px;
-      font-size: 0.72rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.73rem;
       font-weight: 600;
+      letter-spacing: 0.02em;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
     }
-    .btn:disabled { opacity: 0.35; cursor: default; }
+    .btn:active:not(:disabled) { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .btn-primary { background: var(--blue); color: #fff; }
-    .btn-primary:hover:not(:disabled) { background: #2563eb; }
-    .btn-ghost   { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-    .btn-ghost:hover:not(:disabled) { background: var(--border); }
-    .btn-danger  { background: #3f0e0e; color: var(--red); border: 1px solid #7f1d1d; }
-    .btn-danger:hover:not(:disabled) { background: #7f1d1d; }
-    .btn-icon    { background: none; border: none; color: var(--muted); cursor: pointer; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85rem; line-height: 1; }
+    .btn-primary:hover:not(:disabled) { background: #3b7de0; box-shadow: 0 0 12px var(--glow-blue); }
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border2);
+    }
+    .btn-ghost:hover:not(:disabled) { background: var(--border); box-shadow: 0 2px 8px #00000040; }
+    .btn-danger {
+      background: #1a0505;
+      color: var(--red);
+      border: 1px solid #3f1010;
+    }
+    .btn-danger:hover:not(:disabled) { background: #2d0a0a; box-shadow: 0 0 12px var(--glow-red); }
+    .btn-icon {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      line-height: 1;
+      transition: color 0.15s, background 0.15s, transform 0.4s;
+    }
     .btn-icon:hover { color: var(--text); background: var(--border); }
+    #refresh-btn:hover { transform: rotate(180deg); }
 
-    /* ── New room bar ─────────────────────────────────────── */
+    /* ── New room bar ────────────────────────────────────────── */
     .new-room-bar {
       display: flex;
-      gap: 0.4rem;
-      padding: 0.5rem 0.6rem;
+      gap: 0.45rem;
+      padding: 0.6rem 0.65rem;
       border-bottom: 1px solid var(--border);
+      background: var(--surface);
       flex-shrink: 0;
     }
     .new-room-bar input {
       flex: 1;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 5px;
+      border-radius: var(--radius-sm);
       color: var(--text);
+      font-family: var(--font-mono);
       font-size: 0.72rem;
-      padding: 0.3rem 0.5rem;
+      padding: 0.35rem 0.55rem;
       outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .new-room-bar input:focus { border-color: var(--blue); }
+    .new-room-bar input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px var(--glow-blue);
+    }
 
-    /* ── Rooms panel ──────────────────────────────────────── */
+    /* ── Rooms panel ─────────────────────────────────────────── */
     .room-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.55rem 0.65rem;
-      margin-bottom: 0.4rem;
+      border-radius: var(--radius-md);
+      padding: 0.75rem 0.85rem;
+      margin-bottom: 0.5rem;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
     }
+    .room-card:hover {
+      border-color: var(--border2);
+      box-shadow: 0 4px 16px #00000050;
+      transform: translateY(-1px);
+    }
+    .room-card.joined {
+      border-color: var(--green);
+      background: #051a0d;
+      box-shadow: 0 0 14px #34d39912;
+    }
+
     .room-card-name {
       font-weight: 600;
-      font-size: 0.8rem;
-      margin-bottom: 0.2rem;
+      font-size: 0.82rem;
+      margin-bottom: 0.3rem;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      color: var(--text);
     }
-    .room-card-meta { font-size: 0.68rem; color: var(--muted); margin-bottom: 0.45rem; }
+    .room-card-meta {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-bottom: 0.55rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .room-card-meta::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--border2);
+      flex-shrink: 0;
+    }
+    .room-card.joined .room-card-meta::before {
+      background: var(--green);
+      box-shadow: 0 0 5px var(--green);
+    }
+
     .empty-state { color: var(--muted); font-size: 0.78rem; text-align: center; padding: 2rem 0; }
 
-    /* ── Connection panel ─────────────────────────────────── */
+    /* ── Connection panel ────────────────────────────────────── */
     #connection-panel { border-right: 1px solid var(--border); }
     #conn-body {
       flex: 1;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      padding: 1.5rem;
+      overflow: hidden;
     }
-
-    .status-orb {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
+    .conn-top {
+      flex-shrink: 0;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 1.75rem;
-      transition: border-color 0.4s, box-shadow 0.4s;
+      gap: 1.1rem;
+      padding: 1.25rem 1.5rem 1rem;
+      background: radial-gradient(ellipse at center, #0c1420 0%, var(--bg) 72%);
     }
-    .status-orb.connected  { border-color: var(--green); box-shadow: 0 0 18px #4ade8040; }
-    .status-orb.connecting { border-color: var(--yellow); animation: pulse 1.4s infinite; }
-    .status-orb.error      { border-color: var(--red); }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-    .status-text { font-size: 0.8rem; color: var(--muted); text-align: center; max-width: 200px; }
-    .room-name-label { font-size: 1rem; font-weight: 700; text-align: center; }
-
-    .agent-pill {
-      padding: 0.2rem 0.65rem;
-      border-radius: 999px;
-      font-size: 0.65rem;
+    .conn-transcript {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.65rem 0.9rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .tx-entry {
+      padding: 0.5rem 0.65rem;
+      border-radius: var(--radius-sm);
+      border-left: 2px solid transparent;
+      animation: slideInRight 0.15s ease-out;
+    }
+    .tx-agent { border-left-color: var(--green); background: #041510; }
+    .tx-user  { border-left-color: var(--cyan);  background: #031416; }
+    .tx-label {
+      display: block;
+      font-size: 0.58rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      transition: all 0.3s;
+      margin-bottom: 0.2rem;
     }
-    .pill-idle      { background: #1c1c1c; color: var(--muted); }
-    .pill-listening { background: #052e16; color: var(--green); }
-    .pill-thinking  { background: #3b1f04; color: var(--yellow); }
-    .pill-speaking  { background: #431407; color: var(--orange); }
+    .tx-agent .tx-label { color: var(--green); }
+    .tx-user  .tx-label { color: var(--cyan); }
+    .tx-text {
+      font-size: 0.84rem;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    .tx-entry.streaming .tx-text::after {
+      content: '▌';
+      animation: cursorBlink 0.7s step-end infinite;
+      opacity: 0.7;
+    }
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 0.7; }
+      50%       { opacity: 0; }
+    }
+    /* user-speaking: blue outer ring pulse */
+    .orb-shell.user-speaking .orb-ring-outer {
+      border-color: var(--blue) !important;
+      opacity: 0.8 !important;
+      animation: userSpeakRing 0.65s ease-in-out infinite !important;
+    }
+    @keyframes userSpeakRing {
+      0%, 100% { transform: scale(1);    opacity: 0.45; }
+      50%       { transform: scale(1.12); opacity: 0.9; }
+    }
 
-    .controls { display: flex; gap: 0.5rem; }
+    /* ── Orb shell ───────────────────────────────────────────── */
+    .orb-shell {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-    /* ── Pipeline feed ────────────────────────────────────── */
-    #pipeline-feed { display: flex; flex-direction: column; gap: 2px; }
+    .orb-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      pointer-events: none;
+      transition: border-color 0.5s;
+    }
+    .orb-ring-outer {
+      width: 150px;
+      height: 150px;
+      opacity: 0.35;
+      animation: idleRingBreath 4s ease-in-out infinite;
+    }
+    .orb-ring-mid {
+      width: 118px;
+      height: 118px;
+      opacity: 0.5;
+      animation: idleRingBreath 4s ease-in-out infinite 0.8s;
+    }
+
+    @keyframes idleRingBreath {
+      0%, 100% { transform: scale(1);    opacity: 0.3; }
+      50%       { transform: scale(1.04); opacity: 0.55; }
+    }
+
+    /* Core orb */
+    .status-orb {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 2px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.5s, box-shadow 0.5s, background 0.5s;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* connected */
+    .status-orb.connected {
+      border-color: var(--green);
+      box-shadow: 0 0 0 1px var(--green), 0 0 26px var(--glow-green), 0 0 52px #34d39910;
+      background: #0a1a12;
+      animation: connectedBeat 2.6s ease-in-out infinite;
+    }
+    @keyframes connectedBeat {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.03); }
+    }
+
+    /* connecting — rings spin */
+    .status-orb.connecting {
+      border-color: var(--yellow);
+      box-shadow: 0 0 22px var(--glow-yellow);
+      background: #150f00;
+    }
+    .orb-shell.connecting .orb-ring-outer {
+      border-color: var(--yellow);
+      border-top-color: transparent;
+      animation: spinRing 1.1s linear infinite;
+      opacity: 0.8;
+    }
+    .orb-shell.connecting .orb-ring-mid {
+      border-color: var(--yellow);
+      border-bottom-color: transparent;
+      animation: spinRing 1.7s linear infinite reverse;
+      opacity: 0.5;
+    }
+    @keyframes spinRing { to { transform: rotate(360deg); } }
+
+    /* error */
+    .status-orb.error {
+      border-color: var(--red);
+      box-shadow: 0 0 22px var(--glow-red);
+      background: #1a0808;
+      animation: errorFlash 0.8s ease-in-out 3;
+    }
+    @keyframes errorFlash {
+      0%, 100% { box-shadow: 0 0 22px var(--glow-red); }
+      50%       { box-shadow: 0 0 40px #f8717170, 0 0 70px #f8717120; }
+    }
+
+    /* ── Agent-state orb overlays ────────────────────────────── */
+
+    /* listening — cyan breathing rings */
+    .orb-shell[data-agent="listening"] .orb-ring-outer {
+      border-color: var(--cyan);
+      animation: listenPulse 1.3s ease-in-out infinite;
+      opacity: 0.7;
+    }
+    .orb-shell[data-agent="listening"] .orb-ring-mid {
+      border-color: var(--cyan);
+      animation: listenPulse 1.3s ease-in-out infinite 0.35s;
+      opacity: 0.4;
+    }
+    .orb-shell[data-agent="listening"] .status-orb {
+      box-shadow: 0 0 0 2px var(--cyan), 0 0 30px var(--glow-cyan);
+      border-color: var(--cyan);
+    }
+    @keyframes listenPulse {
+      0%, 100% { transform: scale(1);    opacity: 0.3; }
+      50%       { transform: scale(1.08); opacity: 0.75; }
+    }
+
+    /* thinking — yellow orbiting dots */
+    .orb-shell[data-agent="thinking"] .orb-ring-mid {
+      border: 1px dashed var(--yellow);
+      animation: spinRingThink 3s linear infinite;
+      opacity: 0.5;
+    }
+    .orb-shell[data-agent="thinking"] .orb-ring-mid::before,
+    .orb-shell[data-agent="thinking"] .orb-ring-mid::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--yellow);
+      box-shadow: 0 0 10px var(--yellow), 0 0 20px #fbbf2460;
+      /* positioned at top-center of the 118×118 ring */
+      top: -4px;
+      left: 50%;
+      margin-left: -4px;
+      /* rotate around ring center: x=4px (dot half-width), y=63px (4px above ring + 59px radius) */
+      transform-origin: 4px 63px;
+    }
+    .orb-shell[data-agent="thinking"] .orb-ring-mid::before {
+      animation: orbitDot 2.4s linear infinite;
+    }
+    .orb-shell[data-agent="thinking"] .orb-ring-mid::after {
+      animation: orbitDot 2.4s linear infinite -1.2s;
+    }
+    @keyframes orbitDot {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes spinRingThink {
+      to { transform: rotate(-360deg); }
+    }
+    .orb-shell[data-agent="thinking"] .orb-ring-outer {
+      border-color: var(--yellow);
+      opacity: 0.2;
+      animation: idleRingBreath 2s ease-in-out infinite;
+    }
+    .orb-shell[data-agent="thinking"] .status-orb {
+      box-shadow: 0 0 0 1px var(--yellow), 0 0 26px var(--glow-yellow);
+      border-color: var(--yellow);
+    }
+
+    /* speaking — orange glow + audio bars */
+    .orb-shell[data-agent="speaking"] .orb-ring-outer {
+      border-color: var(--orange);
+      opacity: 0.3;
+      animation: speakBreath 0.8s ease-in-out infinite;
+    }
+    .orb-shell[data-agent="speaking"] .orb-ring-mid {
+      border-color: var(--orange);
+      opacity: 0.2;
+      animation: speakBreath 0.8s ease-in-out infinite 0.2s;
+    }
+    .orb-shell[data-agent="speaking"] .status-orb {
+      box-shadow: 0 0 0 2px var(--orange), 0 0 30px var(--glow-orange);
+      border-color: var(--orange);
+    }
+    @keyframes speakBreath {
+      0%, 100% { transform: scale(1);    opacity: 0.2; }
+      50%       { transform: scale(1.06); opacity: 0.45; }
+    }
+    .orb-shell[data-agent="speaking"] .orb-bars { opacity: 1; }
+
+    /* Audio bars */
+    .orb-bars {
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 22px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .orb-bars span {
+      width: 4px;
+      border-radius: 2px;
+      background: var(--orange);
+      height: 5px;
+    }
+    .orb-shell[data-agent="speaking"] .orb-bars span:nth-child(1) { animation: barWave 0.75s ease-in-out infinite 0.00s; }
+    .orb-shell[data-agent="speaking"] .orb-bars span:nth-child(2) { animation: barWave 0.75s ease-in-out infinite 0.13s; }
+    .orb-shell[data-agent="speaking"] .orb-bars span:nth-child(3) { animation: barWave 0.75s ease-in-out infinite 0.26s; }
+    .orb-shell[data-agent="speaking"] .orb-bars span:nth-child(4) { animation: barWave 0.75s ease-in-out infinite 0.13s; }
+    .orb-shell[data-agent="speaking"] .orb-bars span:nth-child(5) { animation: barWave 0.75s ease-in-out infinite 0.00s; }
+    @keyframes barWave {
+      0%, 100% { height: 5px;  background: var(--orange); }
+      50%       { height: 20px; background: #fdba74; }
+    }
+
+    /* ── Status text / room label ────────────────────────────── */
+    .status-text {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      max-width: 220px;
+      line-height: 1.5;
+    }
+    .room-name-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--text);
+      text-align: center;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-bottom: 3px;
+      border-bottom: 1px solid var(--border2);
+    }
+
+    /* ── Agent pill ──────────────────────────────────────────── */
+    .agent-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      min-width: 165px;
+      justify-content: center;
+      transition: all 0.35s ease;
+    }
+
+    /* animated dot */
+    .agent-pill::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+      opacity: 0.85;
+    }
+
+    /* state icon via data attr */
+    .agent-pill::after {
+      content: '';
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.8;
+    }
+
+    .pill-idle {
+      background: var(--surface2);
+      color: var(--muted);
+      border-color: var(--border);
+    }
+    .pill-idle::before { animation: none; opacity: 0.4; }
+    .pill-idle::after {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='2' width='6' height='12' rx='3'/%3E%3Cpath d='M5 10a7 7 0 0 0 14 0'/%3E%3Cline x1='12' y1='19' x2='12' y2='22'/%3E%3Cline x1='9' y1='22' x2='15' y2='22'/%3E%3C/svg%3E");
+    }
+
+    .pill-listening {
+      background: #041510;
+      color: var(--green);
+      border-color: #1a5c32;
+      box-shadow: 0 0 14px #34d39915;
+    }
+    .pill-listening::before { animation: dotBounce 0.9s ease-in-out infinite; }
+    .pill-listening::after {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2334d399' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M1 12s3-7 11-7 11 7 11 7-3 7-11 7S1 12 1 12z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+    }
+
+    .pill-thinking {
+      background: linear-gradient(135deg, #15100040, #241a0040);
+      color: var(--yellow);
+      border-color: #6b4a0e;
+      box-shadow: 0 0 14px #fbbf2415;
+    }
+    .pill-thinking::before { animation: dotSpin 1.2s linear infinite; }
+    .pill-thinking::after {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fbbf24' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5z'/%3E%3Ccircle cx='5' cy='19' r='1' fill='%23fbbf24'/%3E%3Ccircle cx='19' cy='17' r='1.2' fill='%23fbbf24'/%3E%3C/svg%3E");
+    }
+
+    .pill-speaking {
+      background: linear-gradient(135deg, #1f100040, #2a110040);
+      color: var(--orange);
+      border-color: #7a3a14;
+      box-shadow: 0 0 14px #fb923c15;
+    }
+    .pill-speaking::before { animation: dotWave 0.6s ease-in-out infinite; }
+    .pill-speaking::after {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fb923c' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='11 5 6 9 2 9 2 15 6 15 11 19 11 5'/%3E%3Cpath d='M15.54 8.46a5 5 0 0 1 0 7.07'/%3E%3Cpath d='M19.07 4.93a10 10 0 0 1 0 14.14'/%3E%3C/svg%3E");
+    }
+
+    @keyframes dotBounce {
+      0%, 100% { transform: translateY(0);   opacity: 0.85; }
+      50%       { transform: translateY(-3px); opacity: 1; }
+    }
+    @keyframes dotSpin {
+      to { transform: rotate(360deg); border-radius: 2px; }
+    }
+    @keyframes dotWave {
+      0%, 100% { transform: scaleY(1); }
+      50%       { transform: scaleY(1.7); }
+    }
+
+    .controls { display: flex; gap: 0.6rem; margin-top: 0.25rem; }
+
+    /* ── Pipeline feed ───────────────────────────────────────── */
+    #pipeline-feed { display: flex; flex-direction: column; gap: 1px; }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(10px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
 
     .pipe-entry {
       display: grid;
-      grid-template-columns: 44px 40px 1fr;
-      gap: 0.4rem;
-      padding: 0.3rem 0.4rem;
-      border-radius: 5px;
-      align-items: baseline;
-      line-height: 1.5;
+      grid-template-columns: 50px 50px 1fr;
+      gap: 0.45rem;
+      padding: 0.45rem 0.5rem;
+      border-radius: var(--radius-sm);
+      align-items: start;
+      line-height: 1.55;
+      border-left: 2px solid transparent;
+      animation: slideInRight 0.2s ease-out;
+      transition: background 0.15s;
     }
-    .pipe-entry:hover { background: #1a1a1a; }
+    .pipe-entry:hover { background: var(--surface2); }
 
-    .pipe-time { font-size: 0.6rem; color: var(--muted); white-space: nowrap; }
+    /* left accent border per tag */
+    .pipe-entry:has(.tag-llm)  { border-left-color: var(--yellow); }
+    .pipe-entry:has(.tag-tts)  { border-left-color: var(--orange); }
+    .pipe-entry:has(.tag-room) { border-left-color: var(--purple); }
+    .pipe-entry:has(.tag-data) { border-left-color: var(--gray);   }
+
+    /* streaming (interim) row */
+    .pipe-entry.streaming { animation: streamBlink 0.9s ease-in-out infinite; }
+    @keyframes streamBlink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.6; }
+    }
+
+    .pipe-time {
+      font-family: var(--font-mono);
+      font-size: 0.57rem;
+      color: var(--muted);
+      white-space: nowrap;
+      padding-top: 0.12rem;
+      opacity: 0.7;
+    }
+
     .pipe-tag {
-      font-size: 0.58rem;
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
       font-weight: 700;
-      letter-spacing: 0.05em;
-      padding: 0.12rem 0.3rem;
-      border-radius: 3px;
+      letter-spacing: 0.04em;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
       text-align: center;
       white-space: nowrap;
     }
-    .pipe-text { font-size: 0.73rem; color: var(--text); word-break: break-word; }
 
-    .tag-stt   { background: #0c2a3a; color: var(--cyan);   }
-    .tag-agent { background: #052e16; color: var(--green);  }
-    .tag-llm   { background: #3b1f04; color: var(--yellow); }
-    .tag-tts   { background: #431407; color: var(--orange); }
-    .tag-room  { background: #2e1065; color: var(--purple); }
-    .tag-data  { background: #1c1c1c; color: var(--gray);   }
+    .pipe-text {
+      font-size: 0.73rem;
+      color: var(--text);
+      word-break: break-word;
+      padding-top: 0.05rem;
+    }
 
-    /* scrollbar styling */
-    ::-webkit-scrollbar { width: 4px; }
+    .tag-llm   { background: linear-gradient(135deg, #3b1f04, #251405); color: var(--yellow); border: 1px solid #6b3a08; }
+    .tag-tts   { background: linear-gradient(135deg, #431407, #2d0e05); color: var(--orange); border: 1px solid #7a2a10; }
+    .tag-room  { background: linear-gradient(135deg, #2e1065, #1e0b44); color: var(--purple); border: 1px solid #5a2a9a; }
+    .tag-data  { background: linear-gradient(135deg, #1c1c1c, #141414); color: var(--gray);   border: 1px solid #333;   }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    /* focus */
+    :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   </style>
 </head>
 <body>
   <header>
-    <span class="brand">Cortana</span>
-    <span class="dot">|</span>
-    <span>Demo Dashboard</span>
+    <div class="header-brand">
+      <svg class="header-icon" viewBox="0 0 24 24" width="18" height="18" fill="none">
+        <path d="M3 12h2l2-6 2 12 2-9 2 6 2-3h4"
+              stroke="var(--cyan)" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand">Cortana</span>
+    </div>
+    <div class="header-center">
+      <span class="header-product">Voice AI Dashboard</span>
+    </div>
+    <div class="header-right">
+      <span class="live-badge" id="live-badge">● LIVE</span>
+      <span class="header-clock" id="header-clock"></span>
+    </div>
   </header>
 
   <div class="grid">
 
-    <!-- ── LEFT: Rooms ───────────────────────────────────── -->
+    <!-- ── LEFT: Rooms ──────────────────────────────────────── -->
     <section id="rooms-panel">
       <div class="panel-header">
         <span>Live Rooms</span>
@@ -251,22 +787,39 @@
       </div>
     </section>
 
-    <!-- ── CENTER: Connection ────────────────────────────── -->
+    <!-- ── CENTER: Connection ───────────────────────────────── -->
     <section id="connection-panel">
       <div class="panel-header"><span>Connection</span></div>
       <div id="conn-body">
-        <div class="status-orb" id="status-orb">🎙</div>
-        <div class="status-text" id="status-text">Idle — select a room to join</div>
-        <div class="room-name-label" id="room-name-label" style="display:none"></div>
-        <div class="agent-pill pill-idle" id="agent-pill" style="display:none">Agent: idle</div>
-        <div class="controls">
-          <button class="btn btn-ghost"   id="mute-btn"  disabled>Mute</button>
-          <button class="btn btn-danger"  id="leave-btn" disabled>Leave</button>
+        <div class="conn-top">
+          <div class="orb-shell" id="orb-shell">
+            <div class="orb-ring orb-ring-outer"></div>
+            <div class="orb-ring orb-ring-mid"></div>
+            <div class="status-orb" id="status-orb">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="2" width="6" height="12" rx="3"/>
+                <path d="M5 10a7 7 0 0 0 14 0"/>
+                <line x1="12" y1="19" x2="12" y2="22"/>
+                <line x1="9" y1="22" x2="15" y2="22"/>
+              </svg>
+            </div>
+            <div class="orb-bars" id="orb-bars">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="status-text" id="status-text">Idle — select a room to join</div>
+          <div class="room-name-label" id="room-name-label" style="display:none"></div>
+          <div class="agent-pill pill-idle" id="agent-pill" style="display:none">idle</div>
+          <div class="controls">
+            <button class="btn btn-ghost"  id="mute-btn"  disabled>Mute</button>
+            <button class="btn btn-danger" id="leave-btn" disabled>Leave</button>
+          </div>
         </div>
+        <div class="conn-transcript" id="conn-transcript"></div>
       </div>
     </section>
 
-    <!-- ── RIGHT: Pipeline ───────────────────────────────── -->
+    <!-- ── RIGHT: Pipeline ──────────────────────────────────── -->
     <section id="pipeline-panel">
       <div class="panel-header">
         <span>Pipeline</span>
@@ -286,7 +839,10 @@
 
     const { Room, RoomEvent, Track, ParticipantKind } = LivekitClient;
 
-    // ── DOM refs ────────────────────────────────────────────────────────────
+    // Tag icons for pipeline feed
+    const TAG_ICONS = { LLM: '⟡', TTS: '▶', ROOM: '⌗', DATA: '⊞' };
+
+    // ── DOM refs ─────────────────────────────────────────────────────────────
     const roomsList    = document.getElementById('rooms-list');
     const statusOrb    = document.getElementById('status-orb');
     const statusText   = document.getElementById('status-text');
@@ -297,21 +853,34 @@
     const pipelineFeed = document.getElementById('pipeline-feed');
     const refreshBtn   = document.getElementById('refresh-btn');
     const clearBtn     = document.getElementById('clear-btn');
+    const orbShell     = document.getElementById('orb-shell');
+    const liveBadge    = document.getElementById('live-badge');
+    const txArea       = document.getElementById('conn-transcript');
 
-    // ── State ───────────────────────────────────────────────────────────────
-    let room          = null;
-    let muted         = false;
-    let refreshTimer  = null;
+    // ── State ────────────────────────────────────────────────────────────────
+    let room         = null;
+    let muted        = false;
+    let refreshTimer = null;
+    let txStreaming   = { agent: null, user: null };
+
+    // SVG icons for orb core per connection state
+    const ORB_ICONS = {
+      idle: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>`,
+      connecting: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="var(--yellow)" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="2" fill="var(--yellow)"/><circle cx="12" cy="12" r="6" opacity=".35"/><circle cx="12" cy="12" r="10" opacity=".12"/></svg>`,
+      connected: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="var(--green)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    };
 
     // ── Pipeline feed ────────────────────────────────────────────────────────
     function addEntry(tag, text, cls) {
       const now = new Date();
       const t   = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const icon = TAG_ICONS[tag] ?? '';
       const row = document.createElement('div');
       row.className = 'pipe-entry';
       row.innerHTML =
         `<span class="pipe-time">${t}</span>` +
-        `<span class="pipe-tag tag-${cls}">${esc(tag)}</span>` +
+        `<span class="pipe-tag tag-${cls}">${icon} ${esc(tag)}</span>` +
         `<span class="pipe-text">${esc(text)}</span>`;
       pipelineFeed.prepend(row);
       return row;
@@ -322,6 +891,37 @@
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
+    }
+
+    // ── Transcript (center panel) ────────────────────────────────────────────
+    function addTranscript(speaker, text, isFinal) {
+      const key   = speaker === 'agent' ? 'agent' : 'user';
+      const label = speaker === 'agent' ? 'Agent' : 'You';
+      const cls   = `tx-entry tx-${key}`;
+
+      if (!isFinal) {
+        if (!txStreaming[key]) {
+          const el = document.createElement('div');
+          el.className = cls + ' streaming';
+          el.innerHTML = `<span class="tx-label">${label}</span><span class="tx-text">${esc(text)}</span>`;
+          txArea.appendChild(el);
+          txStreaming[key] = el;
+        } else {
+          txStreaming[key].querySelector('.tx-text').textContent = text;
+        }
+      } else {
+        if (txStreaming[key]) {
+          txStreaming[key].querySelector('.tx-text').textContent = text;
+          txStreaming[key].classList.remove('streaming');
+          txStreaming[key] = null;
+        } else if (text.trim()) {
+          const el = document.createElement('div');
+          el.className = cls;
+          el.innerHTML = `<span class="tx-label">${label}</span><span class="tx-text">${esc(text)}</span>`;
+          txArea.appendChild(el);
+        }
+      }
+      txArea.scrollTop = txArea.scrollHeight;
     }
 
     clearBtn.addEventListener('click', () => { pipelineFeed.innerHTML = ''; });
@@ -352,7 +952,7 @@
         const joined = r.name === currentRoom;
         const count  = r.numParticipants ?? 0;
         return `
-          <div class="room-card">
+          <div class="room-card${joined ? ' joined' : ''}">
             <div class="room-card-name" title="${esc(r.name)}">${esc(r.name)}</div>
             <div class="room-card-meta">${count} participant${count !== 1 ? 's' : ''}</div>
             <button class="btn btn-primary"
@@ -373,8 +973,10 @@
 
     // ── Connection state helpers ─────────────────────────────────────────────
     function setStatus(state, text) {
-      statusOrb.className  = `status-orb ${state}`;
+      statusOrb.className    = `status-orb ${state}`;
       statusText.textContent = text;
+      orbShell.className     = `orb-shell ${state}`;
+      statusOrb.innerHTML    = ORB_ICONS[state] ?? ORB_ICONS.idle;
     }
 
     function setAgentState(state) {
@@ -384,9 +986,11 @@
         thinking:  'pill-thinking',
         speaking:  'pill-speaking',
       }[state] ?? 'pill-idle';
-      agentPill.className   = `agent-pill ${pillClass}`;
-      agentPill.textContent = `Agent: ${state}`;
-      agentPill.style.display = '';
+      orbShell.dataset.agent      = state;
+      agentPill.dataset.agentState = state;
+      agentPill.className          = `agent-pill ${pillClass}`;
+      agentPill.textContent        = state;
+      agentPill.style.display      = '';
     }
 
     // ── Join / leave ─────────────────────────────────────────────────────────
@@ -394,7 +998,6 @@
       if (room) await leaveRoom();
 
       setStatus('connecting', `Connecting to ${roomName}…`);
-      statusOrb.textContent = '…';
       addEntry('ROOM', `Connecting → ${roomName}`, 'room');
 
       const identity = `demo-${Math.random().toString(36).slice(2, 7)}`;
@@ -407,7 +1010,6 @@
         token = data.token;
       } catch (e) {
         setStatus('error', 'Token error');
-        statusOrb.textContent = '✕';
         addEntry('ROOM', `Token error: ${e.message}`, 'room');
         return;
       }
@@ -424,11 +1026,11 @@
         leaveBtn.disabled = false;
         roomNameLbl.textContent = roomName;
         roomNameLbl.style.display = '';
+        liveBadge.classList.add('active');
         setAgentState('idle');
         addEntry('ROOM', `Microphone enabled`, 'room');
       } catch (e) {
         setStatus('error', `Connect failed: ${e.message}`);
-        statusOrb.textContent = '✕';
         addEntry('ROOM', `Connect failed: ${e.message}`, 'room');
         room = null;
         muteBtn.disabled  = true;
@@ -447,9 +1049,12 @@
       muteBtn.textContent = 'Mute';
       roomNameLbl.style.display = 'none';
       agentPill.style.display   = 'none';
-      setStatus('', 'Idle — select a room to join');
-      statusOrb.className   = 'status-orb';
-      statusOrb.textContent = '🎙';
+      liveBadge.classList.remove('active');
+      setStatus('idle', 'Idle — select a room to join');
+      orbShell.dataset.agent = '';
+      orbShell.classList.remove('user-speaking');
+      txArea.innerHTML = '';
+      txStreaming = { agent: null, user: null };
       loadRooms();
     }
 
@@ -468,15 +1073,14 @@
 
       r.on(RoomEvent.Connected, () => {
         setStatus('connected', 'Connected');
-        statusOrb.textContent = '✓';
         addEntry('ROOM', `Connected to "${r.name}"`, 'room');
-        loadRooms(); // refresh to show joined state
+        loadRooms();
       });
 
       r.on(RoomEvent.Disconnected, () => {
-        setStatus('', 'Disconnected');
-        statusOrb.textContent = '🎙';
+        setStatus('idle', 'Disconnected');
         agentPill.style.display = 'none';
+        orbShell.dataset.agent  = '';
         addEntry('ROOM', 'Disconnected', 'room');
         loadRooms();
       });
@@ -503,47 +1107,44 @@
         if (track.kind === Track.Kind.Audio) track.detach();
       });
 
+      // Drive speaking orb directly from real audio levels (reliable fallback)
+      r.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
+        const agentSpeaking = speakers.some(p => p.kind === ParticipantKind?.AGENT);
+        const userSpeaking  = speakers.some(p => p.sid === r.localParticipant?.sid);
+
+        if (agentSpeaking) {
+          orbShell.dataset.agent = 'speaking';
+        } else if (orbShell.dataset.agent === 'speaking') {
+          orbShell.dataset.agent = 'idle';
+        }
+
+        if (userSpeaking) {
+          orbShell.classList.add('user-speaking');
+        } else {
+          orbShell.classList.remove('user-speaking');
+        }
+      });
+
       // Agent state & arbitrary attribute changes
       r.on(RoomEvent.ParticipantAttributesChanged, (changed, participant) => {
         for (const [key, val] of Object.entries(changed)) {
           if (key === 'lk.agent.state' || key === 'ag.state') {
             setAgentState(val);
-            if      (val === 'thinking')  addEntry('LLM',   'Thinking…', 'llm');
-            else if (val === 'speaking')  addEntry('TTS',   'Speaking',  'tts');
-            else if (val === 'listening') addEntry('STT',   'Listening', 'stt');
+            if (val === 'thinking') addEntry('LLM', 'Thinking…', 'llm');
           } else {
             addEntry('DATA', `${participant.identity} · ${key} = ${val}`, 'data');
           }
         }
       });
 
-      // STT / agent transcriptions (livekit-client v2+)
-      const streamingRows = { agent: null, stt: null };
+      // STT / agent transcriptions — shown in center transcript only
       if (RoomEvent.TranscriptionReceived) {
         r.on(RoomEvent.TranscriptionReceived, (segments, participant) => {
           for (const seg of segments) {
             if (!seg.text.trim()) continue;
             const isAgent = participant?.kind === ParticipantKind?.AGENT;
             const key = isAgent ? 'agent' : 'stt';
-            const tag = isAgent ? 'AGENT' : 'STT';
-            const cls = key;
-
-            if (!seg.final) {
-              // interim: create or update the in-progress row
-              if (!streamingRows[key]) {
-                streamingRows[key] = addEntry(tag, seg.text, cls);
-              } else {
-                streamingRows[key].querySelector('.pipe-text').textContent = seg.text;
-              }
-            } else {
-              // final: commit or replace
-              if (streamingRows[key]) {
-                streamingRows[key].querySelector('.pipe-text').textContent = seg.text;
-                streamingRows[key] = null;
-              } else {
-                addEntry(tag, seg.text, cls);
-              }
-            }
+            addTranscript(key, seg.text, seg.final);
           }
         });
       }
@@ -564,18 +1165,26 @@
       });
     }
 
-    // ── Create & join new room ───────────────────────────────────────────────
+    // ── Create & join new room ────────────────────────────────────────────────
     function createAndJoin() {
       const name = document.getElementById('new-room-input').value.trim();
       if (!name) return;
-      joinRoom(name); // LiveKit auto-creates the room on first participant join
+      joinRoom(name);
     }
 
     document.getElementById('new-room-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') createAndJoin();
     });
 
-    // ── Init ─────────────────────────────────────────────────────────────────
+    // ── Header clock ─────────────────────────────────────────────────────────
+    const clockEl = document.getElementById('header-clock');
+    function updateClock() {
+      clockEl.textContent = new Date().toLocaleTimeString('en', { hour12: false });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ── Init ──────────────────────────────────────────────────────────────────
     loadRooms();
     startAutoRefresh();
   </script>
